@@ -33,6 +33,37 @@ ul {
   width: 34px;
 }
 
+.square.X {
+  color: blue;
+}
+
+.square.O {
+  color: red;
+}
+
+.square.X.highlight {
+  background-color: darkgray;
+}
+
+.square.O.highlight {
+  background-color: darkgray;
+}
+
+.square.square.X.highlight.blink {
+  animation: blinkAnimeBackground 1s infinite alternate;
+}
+.square.square.O.highlight.blink {
+  animation: blinkAnimeBackground 1s infinite alternate;
+}
+@keyframes blinkAnimeBackground {
+  0% {
+    background-color: #ffffff;
+  }
+  100% {
+    background-color: darkgray;
+  }
+}
+
 .square:focus {
   outline: none;
 }
@@ -51,4 +82,16 @@ ul {
 }
 .text-bold_900 {
   font-weight: 900;
+}
+
+.text-blink {
+  animation: blinkAnimationText 1s infinite alternate;
+}
+@keyframes blinkAnimationText {
+  0% {
+    color: #ffffff;
+  }
+  100% {
+    color: #000000;
+  }
 }

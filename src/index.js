@@ -8,7 +8,15 @@ const Turn = { X: "X", O: "O" };
 
 function Square(props) {
   return (
-    <button className="square" onClick={props.onClick}>
+    <button
+      className={
+        "square" +
+        (props.value === Turn.X ? " X" : " O") +
+        (props.isHighlight ? " highlight" : "") +
+        " blink"
+      }
+      onClick={props.onClick}
+    >
       {props.value}
     </button>
   );
@@ -17,7 +25,7 @@ function Square(props) {
 class Board extends React.Component {
   handleClick(i) {
     const squares = this.state.squares.slice();
-    if (calculateWinner(squares) || squares[i]) {
+    if (calculateWinner(squares).player || squares[i]) {
       return;
     }
     squares[i] = this.state.xIsNext ? Turn.X : Turn.O;
@@ -27,41 +35,42 @@ class Board extends React.Component {
     });
   }
 
-  renderSquare(i) {
+  renderSquare(i, isHighlight) {
     return (
       <Square
         value={this.props.squares[i]}
         onClick={() => this.props.onClick(i)}
         key={i}
+        isHighlight={isHighlight}
       />
     );
   }
 
   // ゲーム盤の描画
+  // 2重ループの使用
   render() {
-    const columns = [];
     const rows = [];
 
-    for (let i = 0; i < SIZE_OF_COLUMN; i++) {
-      columns.push(i);
-    }
-    for (let i = 0; i < SIZE_OF_ROW; i++) {
-      rows.push(i);
-    }
+    for (let row = 0; row < SIZE_OF_ROW; row++) {
+      const squares = [];
+      let isHighlight = null;
 
-    return (
-      <div>
-        {rows.map(row => {
-          return (
-            <div className="board-row" key={row}>
-              {columns.map(column =>
-                this.renderSquare(row * SIZE_OF_ROW + column)
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
+      for (let col = 0; col < SIZE_OF_COLUMN; col++) {
+        isHighlight = this.props.causeOfWin.includes(
+          row * SIZE_OF_COLUMN + col
+        );
+        squares[col] = this.renderSquare(
+          row * SIZE_OF_COLUMN + col,
+          isHighlight
+        );
+      }
+      rows.push(
+        <div className="board-row" key={row}>
+          {squares}
+        </div>
+      );
+    }
+    return <div>{rows}</div>;
   }
 }
 
@@ -89,7 +98,9 @@ class Game extends React.Component {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
-    if (calculateWinner(squares) || squares[i]) {
+    const winner = calculateWinner(squares);
+
+    if (winner.player || squares[i]) {
       return;
     }
     squares[i] = this.state.xIsNext ? Turn.X : Turn.O;
@@ -143,8 +154,10 @@ class Game extends React.Component {
     });
 
     let status;
-    if (winner) {
-      status = "Winner; " + winner;
+    if (winner.player) {
+      status = "Winner; " + winner.player;
+    } else if (!current.squares.includes(null)) {
+      status = "Draw";
     } else {
       status = "Next player: " + (this.state.xIsNext ? Turn.X : Turn.O);
     }
@@ -152,10 +165,14 @@ class Game extends React.Component {
     return (
       <div className="game">
         <div className="game-board">
-          <Board squares={current.squares} onClick={i => this.handleClick(i)} />
+          <Board
+            squares={current.squares}
+            onClick={i => this.handleClick(i)}
+            causeOfWin={winner.causeOfWin}
+          />
         </div>
         <div className="game-info">
-          <div>{status}</div>
+          <div className={status === "Draw" ? "text-blink" : ""}>{status}</div>
           <ol>{moves}</ol>
         </div>
       </div>
@@ -178,11 +195,18 @@ function calculateWinner(squares) {
     [0, 4, 8],
     [2, 4, 6]
   ];
+  const winner = {
+    player: null,
+    causeOfWin: [null]
+  };
+
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+      winner.player = squares[a];
+      winner.causeOfWin = lines[i];
+      return winner;
     }
   }
-  return null;
+  return winner;
 }
