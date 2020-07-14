@@ -5,6 +5,7 @@ import "./index.css";
 const SIZE_OF_COLUMN = 3;
 const SIZE_OF_ROW = 3;
 const Turn = { X: "X", O: "O" };
+const HistorySortType = { ASCENDING: "ASCENDING", DESCENDING: "DESCENDING" };
 
 function Square(props) {
   return (
@@ -115,7 +116,8 @@ class Game extends React.Component {
         }
       ]),
       stepNumber: history.length,
-      xIsNext: !this.state.xIsNext // 手番の入れ替え
+      xIsNext: !this.state.xIsNext, // 手番の入れ替え
+      sortType: HistorySortType.ASCENDING // 初期値は昇順ソート
     });
   }
 
@@ -124,6 +126,18 @@ class Game extends React.Component {
       stepNumber: step,
       xIsNext: step % 2 === 0
     });
+  }
+
+  toggleSortType() {
+    if (this.state.sortType === HistorySortType.ASCENDING) {
+      this.setState({
+        sortType: HistorySortType.DESCENDING
+      });
+    } else if (this.state.sortType === HistorySortType.ASCENDING) {
+      this.setState({
+        sortType: HistorySortType.ASCENDING
+      });
+    }
   }
 
   render() {
@@ -153,6 +167,10 @@ class Game extends React.Component {
       );
     });
 
+    if (this.state.sortType === HistorySortType.DESCENDING) {
+      moves.reverse();
+    }
+
     let status;
     if (winner.player) {
       status = "Winner; " + winner.player;
@@ -174,6 +192,9 @@ class Game extends React.Component {
         <div className="game-info">
           <div className={status === "Draw" ? "text-blink" : ""}>{status}</div>
           <ol>{moves}</ol>
+          <button type="button" onClick={() => this.toggleSortType()}>
+            toggle sort
+          </button>
         </div>
       </div>
     );
