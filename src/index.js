@@ -2,8 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 
-const NUMBER_OF_COLUMS = 3;
-const NUMBER_OF_ROWS = 3;
+const SIZE_OF_COLUMN = 3;
+const SIZE_OF_ROW = 3;
 const Turn = { X: "X", O: "O" };
 
 function Square(props) {
@@ -32,29 +32,34 @@ class Board extends React.Component {
       <Square
         value={this.props.squares[i]}
         onClick={() => this.props.onClick(i)}
+        key={i}
       />
     );
   }
 
   // ゲーム盤の描画
   render() {
+    const columns = [];
+    const rows = [];
+
+    for (let i = 0; i < SIZE_OF_COLUMN; i++) {
+      columns.push(i);
+    }
+    for (let i = 0; i < SIZE_OF_ROW; i++) {
+      rows.push(i);
+    }
+
     return (
       <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
+        {rows.map(row => {
+          return (
+            <div className="board-row" key={row}>
+              {columns.map(column =>
+                this.renderSquare(row * SIZE_OF_ROW + column)
+              )}
+            </div>
+          );
+        })}
       </div>
     );
   }
@@ -67,7 +72,7 @@ class Game extends React.Component {
       history: [
         {
           // squares: Array(9).fill(null)
-          squares: Array(NUMBER_OF_COLUMS * NUMBER_OF_ROWS).fill(null),
+          squares: Array(SIZE_OF_COLUMN * SIZE_OF_ROW).fill(null),
           // 座標
           point: {
             col: null,
@@ -93,13 +98,13 @@ class Game extends React.Component {
         {
           squares: squares,
           point: {
-            col: i % NUMBER_OF_COLUMS,
-            row: Math.trunc(i / NUMBER_OF_ROWS)
+            col: i % SIZE_OF_COLUMN,
+            row: Math.trunc(i / SIZE_OF_ROW)
           }
         }
       ]),
       stepNumber: history.length,
-      xIsNext: !this.state.xIsNext // 相手の手番にする
+      xIsNext: !this.state.xIsNext // 手番の入れ替え
     });
   }
 
@@ -127,7 +132,12 @@ class Game extends React.Component {
         : "Go to game start";
       return (
         <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>{desc}</button>
+          <button
+            onClick={() => this.jumpTo(move)}
+            className={move === this.state.stepNumber ? "text-bold_900" : ""}
+          >
+            {desc}
+          </button>
         </li>
       );
     });
