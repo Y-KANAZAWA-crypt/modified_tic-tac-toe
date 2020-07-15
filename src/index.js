@@ -133,7 +133,7 @@ class Game extends React.Component {
       this.setState({
         sortType: HistorySortType.DESCENDING
       });
-    } else if (this.state.sortType === HistorySortType.ASCENDING) {
+    } else if (this.state.sortType === HistorySortType.DESCENDING) {
       this.setState({
         sortType: HistorySortType.ASCENDING
       });
@@ -141,14 +141,27 @@ class Game extends React.Component {
   }
 
   render() {
-    const history = this.state.history;
-    const current = history[this.state.stepNumber];
+    const history =
+      this.state.sortType === HistorySortType.ASCENDING
+        ? this.state.history
+        : this.state.history.slice().reverse();
+    const stepNumberWhenDescending = history.length - 1 - this.state.stepNumber;
+    const currentStepNumber =
+      this.state.sortType === HistorySortType.ASCENDING
+        ? this.state.stepNumber
+        : stepNumberWhenDescending;
+    const current = history[currentStepNumber];
     const winner = calculateWinner(current.squares);
 
     const moves = history.map((step, move) => {
-      const desc = move
+      const moveWhenDescending = history.length - 1 - move;
+      const moveIndex =
+        this.state.sortType === HistorySortType.ASCENDING
+          ? move
+          : moveWhenDescending;
+      const desc = moveIndex
         ? "Go to move #" +
-          move +
+          moveIndex +
           " (" +
           step.point.col +
           ", " +
@@ -156,20 +169,16 @@ class Game extends React.Component {
           ")"
         : "Go to game start";
       return (
-        <li key={move}>
+        <li key={moveIndex}>
           <button
-            onClick={() => this.jumpTo(move)}
-            className={move === this.state.stepNumber ? "text-bold_900" : ""}
+            onClick={() => this.jumpTo(moveIndex)}
+            className={move === currentStepNumber ? "text-bold_900" : ""}
           >
             {desc}
           </button>
         </li>
       );
     });
-
-    if (this.state.sortType === HistorySortType.DESCENDING) {
-      moves.reverse();
-    }
 
     let status;
     if (winner.player) {
@@ -193,7 +202,7 @@ class Game extends React.Component {
           <div className={status === "Draw" ? "text-blink" : ""}>{status}</div>
           <ol>{moves}</ol>
           <button type="button" onClick={() => this.toggleSortType()}>
-            toggle sort
+            sort
           </button>
         </div>
       </div>

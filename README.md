@@ -1,2 +1,2 @@
-# modified_tic-tac-toe
+# modfied_tic-tac-toe
 Created with CodeSandbox
