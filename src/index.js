@@ -145,12 +145,14 @@ class Game extends React.Component {
       this.state.sortType === HistorySortType.ASCENDING
         ? this.state.history
         : this.state.history.slice().reverse();
+
     const stepNumberWhenDescending = history.length - 1 - this.state.stepNumber;
     const currentStepNumber =
       this.state.sortType === HistorySortType.ASCENDING
         ? this.state.stepNumber
         : stepNumberWhenDescending;
     const current = history[currentStepNumber];
+
     const winner = calculateWinner(current.squares);
 
     const moves = history.map((step, move) => {
